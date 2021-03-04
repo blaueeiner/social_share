@@ -1,10 +1,8 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
-import 'dart:async';
 import 'package:screenshot/screenshot.dart';
 import 'package:social_share/social_share.dart';
 
@@ -58,11 +56,13 @@ class _MyAppState extends State<MyApp> {
                 ),
                 RaisedButton(
                   onPressed: () async {
-                    File file = await ImagePicker.pickImage(
-                        source: ImageSource.gallery);
-                    SocialShare.shareInstagramStory(file.path, "#ffffff",
-                            "#000000", "https://deep-link-url")
-                        .then((data) {
+                    File file = await ImagePicker.pickImage(source: ImageSource.gallery);
+                    SocialShare.shareInstagramStory(
+                      mediaPath: file.path,
+                      backgroundTopColor: "#ffffff",
+                      backgroundBottomColor: "#000000",
+                      attributionURL: "https://deep-link-url",
+                    ).then((data) {
                       print(data);
                     });
                   },
@@ -70,30 +70,55 @@ class _MyAppState extends State<MyApp> {
                 ),
                 RaisedButton(
                   onPressed: () async {
+                    File file = await ImagePicker.pickImage(source: ImageSource.gallery);
+
                     await screenshotController.capture().then((image) async {
-                      SocialShare.shareInstagramStorywithBackground(image.path,
-                              "#ffffff", "#000000", "https://deep-link-url",
-                              backgroundImagePath: image.path)
-                          .then((data) {
+                      SocialShare.shareInstagramStoryWithSticker(
+                        stickerPath: image.path,
+                        backgroundTopColor: "#ffffff",
+                        backgroundBottomColor: "#000000",
+                        attributionURL: "https://deep-link-url",
+                        mediaPath: file.path,
+                        mediaType: ShareMediaType.image,
+                      ).then((data) {
                         print(data);
                       });
                     });
                   },
-                  child: Text("Share On Instagram Story with background"),
+                  child: Text("Share On Instagram Story image with sticker"),
+                ),
+                RaisedButton(
+                  onPressed: () async {
+                    File file = await ImagePicker.pickVideo(source: ImageSource.gallery);
+
+                    await screenshotController.capture().then((image) async {
+                      SocialShare.shareInstagramStoryWithSticker(
+                        stickerPath: image.path,
+                        backgroundTopColor: "#ffffff",
+                        backgroundBottomColor: "#000000",
+                        attributionURL: "https://deep-link-url",
+                        mediaPath: file.path,
+                        mediaType: ShareMediaType.video,
+                      ).then((data) {
+                        print(data);
+                      });
+                    });
+                  },
+                  child: Text("Share On Instagram Story video with sticker"),
                 ),
                 RaisedButton(
                   onPressed: () async {
                     await screenshotController.capture().then((image) async {
                       //facebook appId is mandatory for andorid or else share won't work
                       Platform.isAndroid
-                          ? SocialShare.shareFacebookStory(image.path,
-                                  "#ffffff", "#000000", "https://google.com",
+                          ? SocialShare.shareFacebookStory(
+                                  image.path, "#ffffff", "#000000", "https://google.com",
                                   appId: "xxxxxxxxxxxxx")
                               .then((data) {
                               print(data);
                             })
-                          : SocialShare.shareFacebookStory(image.path,
-                                  "#ffffff", "#000000", "https://google.com")
+                          : SocialShare.shareFacebookStory(
+                                  image.path, "#ffffff", "#000000", "https://google.com")
                               .then((data) {
                               print(data);
                             });
@@ -113,8 +138,7 @@ class _MyAppState extends State<MyApp> {
                 ),
                 RaisedButton(
                   onPressed: () async {
-                    SocialShare.shareTwitter(
-                            "This is Social Share twitter example",
+                    SocialShare.shareTwitter("This is Social Share twitter example",
                             hashtags: ["hello", "world", "foo", "bar"],
                             url: "https://google.com/#/hello",
                             trailingText: "\nhello")
@@ -127,8 +151,7 @@ class _MyAppState extends State<MyApp> {
                 RaisedButton(
                   onPressed: () async {
                     SocialShare.shareSms("This is Social Share Sms example",
-                            url: "\nhttps://google.com/",
-                            trailingText: "\nhello")
+                            url: "\nhttps://google.com/", trailingText: "\nhello")
                         .then((data) {
                       print(data);
                     });
@@ -147,9 +170,7 @@ class _MyAppState extends State<MyApp> {
                 ),
                 RaisedButton(
                   onPressed: () async {
-                    SocialShare.shareWhatsapp(
-                            "Hello World \n https://google.com")
-                        .then((data) {
+                    SocialShare.shareWhatsapp("Hello World \n https://google.com").then((data) {
                       print(data);
                     });
                   },
@@ -157,9 +178,7 @@ class _MyAppState extends State<MyApp> {
                 ),
                 RaisedButton(
                   onPressed: () async {
-                    SocialShare.shareTelegram(
-                            "Hello World \n https://google.com")
-                        .then((data) {
+                    SocialShare.shareTelegram("Hello World \n https://google.com").then((data) {
                       print(data);
                     });
                   },

@@ -1,21 +1,34 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
+
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 import 'package:path_provider/path_provider.dart';
+
+enum ShareMediaType {
+  image,
+  video,
+}
 
 class SocialShare {
   static const MethodChannel _channel = const MethodChannel('social_share');
 
-  static Future<String> shareInstagramStory(
-      String imagePath,
-      String backgroundTopColor,
-      String backgroundBottomColor,
-      String attributionURL) async {
+  static Future<String> shareInstagramStory({
+    @required String mediaPath,
+    @required String backgroundTopColor,
+    @required String backgroundBottomColor,
+    @required String attributionURL,
+    ShareMediaType mediaType = ShareMediaType.image,
+  }) async {
     Map<String, dynamic> args;
+
+    final mediaTypeString = mediaType.toString().split('.').last;
+
     if (Platform.isIOS) {
       args = <String, dynamic>{
-        "stickerImage": imagePath,
+        "stickerPath": mediaPath,
+        "mediaType": mediaTypeString,
         "backgroundTopColor": backgroundTopColor,
         "backgroundBottomColor": backgroundBottomColor,
         "attributionURL": attributionURL
@@ -23,7 +36,7 @@ class SocialShare {
     } else {
       final tempDir = await getTemporaryDirectory();
 
-      File file = File(imagePath);
+      File file = File(mediaPath);
       Uint8List bytes = file.readAsBytesSync();
       var stickerdata = bytes.buffer.asUint8List();
       String stickerAssetName = 'stickerAsset.png';
@@ -32,28 +45,35 @@ class SocialShare {
       file = await File(stickerAssetPath).create();
       file.writeAsBytesSync(stickerAssetAsList);
       args = <String, dynamic>{
-        "stickerImage": stickerAssetName,
+        "sticker": stickerAssetName,
         "backgroundTopColor": backgroundTopColor,
         "backgroundBottomColor": backgroundBottomColor,
         "attributionURL": attributionURL
       };
     }
-    final String response =
-        await _channel.invokeMethod('shareInstagramStory', args);
+
+    final String response = await _channel.invokeMethod('shareInstagramStory', args);
+
     return response;
   }
 
-  static Future<String> shareInstagramStorywithBackground(
-      String imagePath,
-      String backgroundTopColor,
-      String backgroundBottomColor,
-      String attributionURL,
-      {String backgroundImagePath}) async {
+  static Future<String> shareInstagramStoryWithSticker({
+    @required String stickerPath,
+    @required String backgroundTopColor,
+    @required String backgroundBottomColor,
+    @required String attributionURL,
+    @required String mediaPath,
+    ShareMediaType mediaType = ShareMediaType.image,
+  }) async {
     Map<String, dynamic> args;
+
+    final mediaTypeString = mediaType.toString().split('.').last;
+
     if (Platform.isIOS) {
       args = <String, dynamic>{
-        "stickerImage": imagePath,
-        "backgroundImage": backgroundImagePath,
+        "stickerPath": stickerPath,
+        "mediaPath": mediaPath,
+        "mediaType": mediaTypeString,
         "backgroundTopColor": backgroundTopColor,
         "backgroundBottomColor": backgroundBottomColor,
         "attributionURL": attributionURL
@@ -61,7 +81,7 @@ class SocialShare {
     } else {
       final tempDir = await getTemporaryDirectory();
 
-      File file = File(imagePath);
+      File file = File(stickerPath);
       Uint8List bytes = file.readAsBytesSync();
       var stickerdata = bytes.buffer.asUint8List();
       String stickerAssetName = 'stickerAsset.png';
@@ -70,33 +90,30 @@ class SocialShare {
       file = await File(stickerAssetPath).create();
       file.writeAsBytesSync(stickerAssetAsList);
 
-      File backgroundimage = File(backgroundImagePath);
-      Uint8List backgroundimagedata = backgroundimage.readAsBytesSync();
-      String backgroundAssetName = 'backgroundAsset.jpg';
-      final Uint8List backgroundAssetAsList = backgroundimagedata;
-      final backgroundAssetPath = '${tempDir.path}/$backgroundAssetName';
-      File backfile = await File(backgroundAssetPath).create();
-      backfile.writeAsBytesSync(backgroundAssetAsList);
+      File mediaFile = File(mediaPath);
+      Uint8List mediaFileData = mediaFile.readAsBytesSync();
+      String mediaAssetName = 'backgroundAsset.jpg';
+      final backgroundAssetPath = '${tempDir.path}/$mediaAssetName';
+      File backgroundFile = await File(backgroundAssetPath).create();
+      backgroundFile.writeAsBytesSync(mediaFileData);
+
       args = <String, dynamic>{
-        "stickerImage": stickerAssetName,
-        "backgroundImage": backgroundAssetName,
+        "sticker": stickerAssetName,
+        "media": mediaAssetName,
+        "type": mediaTypeString,
         "backgroundTopColor": backgroundTopColor,
         "backgroundBottomColor": backgroundBottomColor,
-        "attributionURL": attributionURL
+        "attributionURL": attributionURL,
       };
     }
 
-    final String response =
-        await _channel.invokeMethod('shareInstagramStory', args);
+    final String response = await _channel.invokeMethod('shareInstagramStory', args);
 
     return response;
   }
 
-  static Future<String> shareFacebookStory(
-      String imagePath,
-      String backgroundTopColor,
-      String backgroundBottomColor,
-      String attributionURL,
+  static Future<String> shareFacebookStory(String imagePath, String backgroundTopColor,
+      String backgroundBottomColor, String attributionURL,
       {String appId}) async {
     Map<String, dynamic> args;
     if (Platform.isIOS) {
@@ -124,8 +141,7 @@ class SocialShare {
         "appId": appId
       };
     }
-    final String response =
-        await _channel.invokeMethod('shareFacebookStory', args);
+    final String response = await _channel.invokeMethod('shareFacebookStory', args);
     return response;
   }
 
@@ -144,8 +160,7 @@ class SocialShare {
         tags += ("%23" + f.toString() + " ").toString();
       });
       args = <String, dynamic>{
-        "captionText":
-            Uri.parse(captionText + "\n" + tags.toString()).toString(),
+        "captionText": Uri.parse(captionText + "\n" + tags.toString()).toString(),
         "url": modifiedUrl,
         "trailingText": Uri.parse(trailingText).toString()
       };
@@ -161,8 +176,7 @@ class SocialShare {
     return version;
   }
 
-  static Future<String> shareSms(String message,
-      {String url, String trailingText}) async {
+  static Future<String> shareSms(String message, {String url, String trailingText}) async {
     Map<String, dynamic> args;
     if (Platform.isIOS) {
       if (url == null) {
@@ -186,15 +200,12 @@ class SocialShare {
   }
 
   static Future<bool> copyToClipboard(content) async {
-    final Map<String, String> args = <String, String>{
-      "content": content.toString()
-    };
+    final Map<String, String> args = <String, String>{"content": content.toString()};
     final bool response = await _channel.invokeMethod('copyToClipboard', args);
     return response;
   }
 
-  static Future<bool> shareOptions(String contentText,
-      {String imagePath}) async {
+  static Future<bool> shareOptions(String contentText, {String imagePath}) async {
     Map<String, dynamic> args;
     if (Platform.isIOS) {
       args = <String, dynamic>{"image": imagePath, "content": contentText};
@@ -228,6 +239,7 @@ class SocialShare {
     final Map apps = await _channel.invokeMethod('checkInstalledApps');
     return apps;
   }
+
   static Future<String> shareTelegram(String content) async {
     final Map<String, dynamic> args = <String, dynamic>{"content": content};
     final String version = await _channel.invokeMethod('shareTelegram', args);
