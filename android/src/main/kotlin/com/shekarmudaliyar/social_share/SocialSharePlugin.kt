@@ -41,8 +41,11 @@ class SocialSharePlugin(private val registrar: Registrar) : MethodCallHandler {
             val sticker: String? = call.argument("sticker")
             val typeString: String? = call.argument("type");
             val media: String? = call.argument("media")
+            val backgroundTopColor: String? = call.argument("backgroundTopColor")
+            val backgroundBottomColor: String? = call.argument("backgroundBottomColor")
+            val attributionURL: String? = call.argument("attributionURL")
 
-            if (typeString == null || !MediaType.values().map {it.toString()}.contains(typeString.toUpperCase())) {
+            if (typeString == null || !MediaType.values().map { it.toString() }.contains(typeString.toUpperCase())) {
                 result.success("error");
 
                 return;
@@ -50,16 +53,17 @@ class SocialSharePlugin(private val registrar: Registrar) : MethodCallHandler {
 
             val mediaType = MediaType.valueOf(typeString.toUpperCase());
 
-            val backgroundTopColor: String? = call.argument("backgroundTopColor")
-            val backgroundBottomColor: String? = call.argument("backgroundBottomColor")
-            val attributionURL: String? = call.argument("attributionURL")
-            val file = File(registrar.activeContext().cacheDir, sticker)
-            val stickerImageFile = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", file)
+            var stickerImageFile: Uri? = null;
+
+            if (sticker != null) {
+                val file = File(registrar.activeContext().cacheDir, sticker)
+                stickerImageFile = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", file)
+            }
 
             val intent = Intent("com.instagram.share.ADD_TO_STORY")
             intent.type = mediaType.type
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            intent.putExtra("interactive_asset_uri", stickerImageFile)
+            intent.putExtra("interactive_asset_uri", stickerImageFile!!)
             if (media != null) {
                 //check if background image is also provided
                 val backfile = File(registrar.activeContext().cacheDir, media)

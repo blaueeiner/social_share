@@ -42,14 +42,42 @@ NSString * const  MEDIA_TYPE_VIDEO = @"video";
         //adding data to send to instagram story
         if ([[UIApplication sharedApplication] canOpenURL:urlScheme]) {
             //if instagram is installed and the url can be opened
-            if ( [ mediaPath  length] == 0 ){
-                //If you dont have a background image
-                // Assign background image asset and attribution link URL to pasteboard
-                NSArray *pasteboardItems = @[@{@"com.instagram.sharedSticker.stickerImage" : stickerImageShare,
-                                               @"com.instagram.sharedSticker.backgroundTopColor" : backgroundTopColor,
-                                               @"com.instagram.sharedSticker.backgroundBottomColor" : backgroundBottomColor,
-                                               @"com.instagram.sharedSticker.contentURL" : attributionURL,
-                }];
+            //if you have background media
+            NSFileManager *fileManager = [NSFileManager defaultManager];
+            BOOL isFileExist = [fileManager fileExistsAtPath: mediaPath];
+            NSData *mediaBackgroundShare;
+            if (isFileExist) {
+                mediaBackgroundShare =  [NSData dataWithContentsOfFile: mediaPath];
+            } else {
+                result([FlutterError errorWithCode:@"invalid_argument"
+                                           message:@"Missing background media path."
+                                           details:nil]);
+                return;
+            }
+            
+            if ( [ stickerPath  length] == 0 ){
+                NSArray *pasteboardItems;
+                if([mediaType isEqualToString: MEDIA_TYPE_IMAGE]) {
+                    pasteboardItems =  @[@{@"com.instagram.sharedSticker.backgroundImage" : mediaBackgroundShare,
+                                           @"com.instagram.sharedSticker.backgroundTopColor" : backgroundTopColor,
+                                           @"com.instagram.sharedSticker.backgroundBottomColor" : backgroundBottomColor,
+                                           @"com.instagram.sharedSticker.contentURL" : attributionURL
+                    }];
+                    
+                } else if ([mediaType  isEqualToString: MEDIA_TYPE_VIDEO]) {
+                    pasteboardItems =  @[@{@"com.instagram.sharedSticker.backgroundVideo" : mediaBackgroundShare,
+                                           @"com.instagram.sharedSticker.backgroundTopColor" : backgroundTopColor,
+                                           @"com.instagram.sharedSticker.backgroundBottomColor" : backgroundBottomColor,
+                                           @"com.instagram.sharedSticker.contentURL" : attributionURL
+                    }];
+                    
+                } else {
+                    result([FlutterError errorWithCode:@"invalid_media_type"
+                                               message:@"Invalid media type."
+                                               details:nil]);
+                    return;
+                }
+                
                 if (@available(iOS 10.0, *)) {
                     NSDictionary *pasteboardOptions = @{UIPasteboardOptionExpirationDate : [[NSDate date] dateByAddingTimeInterval:60 * 5]};
                     // This call is iOS 10+, can use 'setItems' depending on what versions you support
@@ -63,13 +91,6 @@ NSString * const  MEDIA_TYPE_VIDEO = @"video";
                 }
                 
             } else {
-                //if you have background media
-                NSFileManager *fileManager = [NSFileManager defaultManager];
-                BOOL isFileExist = [fileManager fileExistsAtPath: mediaPath];
-                NSData *mediaBackgroundShare;
-                if (isFileExist) {
-                    mediaBackgroundShare =  [NSData dataWithContentsOfFile: mediaPath];
-                }
                 NSArray *pasteboardItems;
                 if([mediaType isEqualToString: MEDIA_TYPE_IMAGE]) {
                     pasteboardItems =  @[@{@"com.instagram.sharedSticker.backgroundImage" : mediaBackgroundShare,

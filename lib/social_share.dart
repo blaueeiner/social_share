@@ -27,7 +27,7 @@ class SocialShare {
 
     if (Platform.isIOS) {
       args = <String, dynamic>{
-        "stickerPath": mediaPath,
+        "mediaPath": mediaPath,
         "mediaType": mediaTypeString,
         "backgroundTopColor": backgroundTopColor,
         "backgroundBottomColor": backgroundBottomColor,
@@ -45,7 +45,8 @@ class SocialShare {
       file = await File(stickerAssetPath).create();
       file.writeAsBytesSync(stickerAssetAsList);
       args = <String, dynamic>{
-        "sticker": stickerAssetName,
+        "media": stickerAssetName,
+        "type": mediaTypeString,
         "backgroundTopColor": backgroundTopColor,
         "backgroundBottomColor": backgroundBottomColor,
         "attributionURL": attributionURL
@@ -58,11 +59,11 @@ class SocialShare {
   }
 
   static Future<String> shareInstagramStoryWithSticker({
+    @required String mediaPath,
     @required String stickerPath,
     @required String backgroundTopColor,
     @required String backgroundBottomColor,
     @required String attributionURL,
-    @required String mediaPath,
     ShareMediaType mediaType = ShareMediaType.image,
   }) async {
     Map<String, dynamic> args;
