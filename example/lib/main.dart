@@ -57,9 +57,10 @@ class _MyAppState extends State<MyApp> {
                 ),
                 RaisedButton(
                   onPressed: () async {
-                    final file = await (ImagePicker().getImage(source: ImageSource.gallery) as FutureOr<PickedFile>);
+                    final file =
+                        await ImagePicker().getImage(source: ImageSource.gallery);
                     SocialShare.shareInstagramStory(
-                      mediaPath: file.path,
+                      mediaPath: file!.path,
                       backgroundTopColor: "#ffffff",
                       backgroundBottomColor: "#000000",
                       attributionURL: "https://deep-link-url",
@@ -71,9 +72,12 @@ class _MyAppState extends State<MyApp> {
                 ),
                 RaisedButton(
                   onPressed: () async {
-                    final file = await ImagePicker().getImage(source: ImageSource.gallery);
+                    final file =
+                        await ImagePicker().getImage(source: ImageSource.gallery);
                     final tempDir = await getTemporaryDirectory();
-                    await screenshotController.captureAndSave(tempDir.path).then((imagePath) async {
+                    await screenshotController
+                        .captureAndSave(tempDir.path)
+                        .then((imagePath) async {
                       SocialShare.shareInstagramStoryWithSticker(
                         stickerPath: imagePath!,
                         backgroundTopColor: "#ffffff",
@@ -90,11 +94,14 @@ class _MyAppState extends State<MyApp> {
                 ),
                 RaisedButton(
                   onPressed: () async {
-                    final file = await ImagePicker().getVideo(source: ImageSource.gallery);
+                    final file =
+                        await ImagePicker().getVideo(source: ImageSource.gallery);
 
                     final tempDir = await getTemporaryDirectory();
 
-                    await screenshotController.captureAndSave(tempDir.path).then((imagePath) async {
+                    await screenshotController
+                        .captureAndSave(tempDir.path)
+                        .then((imagePath) async {
                       SocialShare.shareInstagramStoryWithSticker(
                         stickerPath: imagePath!,
                         backgroundTopColor: "#ffffff",
@@ -112,15 +119,19 @@ class _MyAppState extends State<MyApp> {
                 RaisedButton(
                   onPressed: () async {
                     final tempDir = await getTemporaryDirectory();
-                    await screenshotController.captureAndSave(tempDir.path).then((imagePath) async {
+                    await screenshotController
+                        .captureAndSave(tempDir.path)
+                        .then((imagePath) async {
                       //facebook appId is mandatory for andorid or else share won't work
                       Platform.isAndroid
-                          ? SocialShare.shareFacebookStory(imagePath!, "#ffffff", "#000000", "https://google.com",
+                          ? SocialShare.shareFacebookStory(
+                                  imagePath!, "#ffffff", "#000000", "https://google.com",
                                   appId: "xxxxxxxxxxxxx")
                               .then((data) {
                               print(data);
                             })
-                          : SocialShare.shareFacebookStory(imagePath!, "#ffffff", "#000000", "https://google.com")
+                          : SocialShare.shareFacebookStory(
+                                  imagePath!, "#ffffff", "#000000", "https://google.com")
                               .then((data) {
                               print(data);
                             });
@@ -163,7 +174,9 @@ class _MyAppState extends State<MyApp> {
                 RaisedButton(
                   onPressed: () async {
                     final tempDir = await getTemporaryDirectory();
-                    await screenshotController.captureAndSave(tempDir.path).then((imagePath) async {
+                    await screenshotController
+                        .captureAndSave(tempDir.path)
+                        .then((imagePath) async {
                       SocialShare.shareOptions(
                         'hello world',
                         imagePath: imagePath!,
@@ -176,7 +189,8 @@ class _MyAppState extends State<MyApp> {
                 ),
                 RaisedButton(
                   onPressed: () async {
-                    SocialShare.shareWhatsapp("Hello World \n https://google.com").then((data) {
+                    SocialShare.shareWhatsapp("Hello World \n https://google.com")
+                        .then((data) {
                       print(data);
                     });
                   },
@@ -184,7 +198,8 @@ class _MyAppState extends State<MyApp> {
                 ),
                 RaisedButton(
                   onPressed: () async {
-                    SocialShare.shareTelegram("Hello World \n https://google.com").then((data) {
+                    SocialShare.shareTelegram("Hello World \n https://google.com")
+                        .then((data) {
                       print(data);
                     });
                   },
