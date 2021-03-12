@@ -24,9 +24,9 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/social_share/ios"
 
 SPEC CHECKSUMS:
-  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
-  image_picker: e3eacd46b94694dde7cf2705955cece853aa1a8f
-  path_provider: fb74bd0465e96b594bb3b5088ee4a4e7bb1f2a9d
+  Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
+  image_picker: 50e7c7ff960e5f58faa4d1f4af84a771c671bc4a
+  path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
   social_share: 702a5e3842addd22db515aa9e1e00a4b80a0296d
 
 PODFILE CHECKSUM: 8e679eca47255a8ca8067c4c67aab20e64cb974d
